@@ -14,8 +14,6 @@ def test_add_habit():
     # with pytest.raises(Exception):
     #    tracker.add_habit('workout', 5)
 
-
-
     # Test case 3: Adding a habit with a different name (should not raise an exception)
     tracker.add_habit('drink water', 1)
     assert 'drink water' in tracker.habits
