@@ -28,11 +28,6 @@ class ElementAlreadyExists(Exception):
 class IncompleteHabit(Exception):
     pass
 
-# Custom action class for joining arguments
-# Avoids duplicate code / Avoids using decorators
-class JoinAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, ' '.join(values))
 
 class Habit:
     def __init__(self, name, period):
@@ -94,7 +89,6 @@ habits = {}
 
 
 def add_habit(name, period):
-    print(str(name))
     try:
         if name in habits:
             raise ElementAlreadyExists('A Habit with that name already exists!')
@@ -220,23 +214,23 @@ def main():
     subparsers = parser.add_subparsers(title='Commands', dest='command')
 
     parser_addhabit = subparsers.add_parser('addHabit', help='Adds a Habit')
-    parser_addhabit.add_argument("name", nargs='+', action=JoinAction)
+    parser_addhabit.add_argument("name")
     parser_addhabit.add_argument("period")
 
     parser_removehabit = subparsers.add_parser('removeHabit', help='Removes a Habit and all its data')
-    parser_removehabit.add_argument("name", action=JoinAction)
+    parser_removehabit.add_argument("name")
 
     parser_addtask = subparsers.add_parser('addTask', help='Adds a Task to a Habit')
-    parser_addtask.add_argument("habit", action=JoinAction)
-    parser_addtask.add_argument("task", action=JoinAction)
+    parser_addtask.add_argument("habit")
+    parser_addtask.add_argument("task")
 
     parser_removetask = subparsers.add_parser('removeTask', help='Removes a Task from a Habit')
-    parser_removetask.add_argument('habit', action=JoinAction)
-    parser_removetask.add_argument('task', action=JoinAction)
+    parser_removetask.add_argument('habit')
+    parser_removetask.add_argument('task')
 
     parser_checktask = subparsers.add_parser('checkTask', help='Checks off a Task')
-    parser_checktask.add_argument('habit', action=JoinAction)
-    parser_checktask.add_argument('task', action=JoinAction)
+    parser_checktask.add_argument('habit')
+    parser_checktask.add_argument('task')
 
     subparsers.add_parser('reload', help='reload save file')
     subparsers.add_parser('getAllHabits', help='Returns all stored Habits')
@@ -244,7 +238,6 @@ def main():
     subparsers.add_parser('clear', help='Clear the screen')
 
     commandFunctionMapping = {
-        'loadData': load_from_file,
         'reload': reload,
         'getAllHabits': get_all_habits,
         'addHabit': add_habit,
