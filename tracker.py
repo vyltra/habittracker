@@ -83,7 +83,6 @@ class Habit:
             completions.append(task_completions)
 
         step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
-
         active_streak = False
         streak_start = None
         streak_end = None
@@ -94,11 +93,8 @@ class Habit:
             # function to check if a timestamp is between the current step and step + period
             is_between = lambda dt: step <= dt <= step + timedelta(days=self.period)
 
-            # function to check if for the current period, every task has been completed at least once
-            analyse_cache = 0
-            for n in range(0, len(completions)):
-                result = any(is_between(dt) for dt in completions[n])
-                if result: analyse_cache += 1
+            # generator expression to check if for the current period, every task has been completed at least once
+            analyse_cache = sum(any(is_between(dt) for dt in x) for x in completions)
 
             # check if current period is a streak
             if analyse_cache == len(completions) and not active_streak:
@@ -121,6 +117,107 @@ class Habit:
         # print(str(task_dates))
 
         return analysis_data
+
+    def calculate_streak_new(self):
+        # Extract and convert task completions to datetime objects
+        completions = [[datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in task] for task in self.tasks.values()]
+
+        # Define a function to check if a timestamp is between the current step and step + period
+        def is_between(dt, step):
+            return step <= dt <= step + timedelta(days=self.period)
+
+        # Define a function to check if for the current period, every task has been completed at least once
+        def check_period_completions(step):
+            return all(any(is_between(dt, step) for dt in task) for task in completions)
+
+        # Initialize variables
+        step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
+        active_streak = False
+        streak_start = None
+        streak_end = None
+        streak_duration = 0
+        analysis_data = []
+
+        # Iterate over time steps using a generator expression
+        for step in (step + timedelta(days=self.period) * i for i in
+                     range((datetime.now() - step).days // self.period + 1)):
+            if check_period_completions(step):
+                if not active_streak:
+                    streak_start = step
+                    streak_duration += 1
+                    active_streak = True
+                else:
+                    streak_duration += 1
+            elif active_streak:
+                streak_end = step - timedelta(days=self.period)
+                active_streak = False
+                analysis_data.append([streak_start, streak_duration, streak_end])
+
+        return analysis_data
+
+    def calculate_streak_revised(self):
+
+        completions = []
+        for n in self.tasks.items():
+            task_completions = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in n[1]]
+            completions.append(task_completions)
+
+        step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
+        active_streak = False
+        streak_start = None
+        streak_end = None
+        streak_duration = 0
+        analysis_data = []
+
+        while step <= datetime.now():
+            # function to check if a timestamp is between the current step and step + period
+            is_between = lambda dt: step <= dt <= step + timedelta(days=self.period)
+
+            # generator expression to check if for the current period, every task has been completed at least once
+            analyse_cache = sum(any(is_between(dt) for dt in x) for x in completions)
+
+            # check if current period is a streak
+            if analyse_cache == len(completions) and not active_streak:
+                streak_start = step
+                streak_duration += 1
+                active_streak = True
+            elif analyse_cache == len(completions) and active_streak:
+                streak_duration += 1
+            elif analyse_cache != len(completions) and active_streak:
+                streak_end = step
+                active_streak = False
+                analysis_data.append([streak_start, streak_duration, streak_end])
+
+            # print("Between: "+str(step)+" and :" + str(step+timedelta(days=self.period))+" is between: " + str(result))
+            step += timedelta(days=self.period)
+
+        # print("Streak Analysis Data: " + str(analysis_data))
+
+        # task_dates = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S") for date in self.tasks.items()[1]]
+        # print(str(task_dates))
+
+        return analysis_data
+
+def x():
+    top_streak = {"days": 0}
+
+    habit = "workout"
+    data = habits[habit].calculate_streak_revised()
+    for streaks in data:
+        streak_days = streaks[1] * habits[habit].period
+        if streak_days > top_streak["days"]:
+            top_streak["days"] = streak_days
+            top_streak["habit"] = habits[habit].name
+            top_streak["period"] = habits[habit].period
+            top_streak["start"] = streaks[0]
+            top_streak["end"] = streaks[2]
+
+    print("The Longest Streak was your " + top_streak["habit"] + " Habit")
+    print(
+        "It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
+    print("Beginning on " + datetime.strftime(top_streak["start"],
+                                              "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
+        top_streak["end"], "%Y-%m-%d %H:%M:%S"))
 
 
 habits = {}
@@ -379,6 +476,7 @@ def main():
     subparsers.add_parser('getHabitsByPeriod', help='Returns Lists of Habits sorted by period')
     subparsers.add_parser('save', help='Saves data to file')
     subparsers.add_parser('clear', help='Clear the screen')
+    subparsers.add_parser('x', help='Clear the screen')
 
     commandFunctionMapping = {
         'reload': reload,
@@ -395,6 +493,7 @@ def main():
         'analyze': get_analysis,
         'getLongest': get_max_streak_all,
         'getMaxStreak': get_max_streak_single,
+        'x': x,
     }
 
     while True:
