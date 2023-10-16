@@ -1,4 +1,3 @@
-import pytest
 import tracker
 from datetime import datetime, timedelta
 
@@ -11,10 +10,10 @@ def test_add_habit():
     assert tracker.habits['workout'].name == 'workout'
     assert tracker.habits['workout'].period == 7
 
-    tracker.add_habit('drink water', 1)
-    assert 'drink water' in tracker.habits
-    assert tracker.habits['drink water'].name == 'drink water'
-    assert tracker.habits['drink water'].period == 1
+    tracker.add_habit('drink_water', 1)
+    assert 'drink_water' in tracker.habits
+    assert tracker.habits['drink_water'].name == 'drink_water'
+    assert tracker.habits['drink_water'].period == 1
 
 
 # removes a habit and checks the habit array for it being removed
