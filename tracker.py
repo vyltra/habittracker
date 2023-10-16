@@ -3,16 +3,12 @@ from datetime import datetime, timedelta
 import json
 import argparse
 
-# fix input string spaces
-# add overwrite error check
-# add unit tests
-# add analysis
-
 # global Error / Warning sign
-err = "[Error]"
-war = "[Warning]"
+err = "[Error] "
+war = "[Warning] "
 
 
+# custom exceptions for clarity
 class HabitTypeError(Exception):
     pass
 
@@ -29,6 +25,7 @@ class IncompleteHabit(Exception):
     pass
 
 
+# main habit class to define habit structure
 class Habit:
     def __init__(self, name, period):
         # input check name
@@ -43,20 +40,21 @@ class Habit:
 
         if not period < 365:
             raise HabitTypeError("The Habit's period must be an integer between 0 and 365!x")
+
         self.period = period
-
         self.name = name
-
         self.creation_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.tasks = {}
 
+    # adds a task to the habit
     def add_task(self, name):
         if name in self.tasks:
             raise ElementAlreadyExists('This Task already exists!')
         else:
-            self.tasks[name] = ['1970-01-01 00:00:00']
+            self.tasks[name] = []
             print('Added task ' + name + ' to Habit ' + self.name)
 
+    # removes a task from the habit
     def remove_task(self, name):
         if name in self.tasks:
             del self.tasks[name]
@@ -64,6 +62,7 @@ class Habit:
         else:
             raise ElementNotFound('There is no task with that name!')
 
+    # "checks off" a task - adds the current timestamp to the array of the respective task
     def check_task(self, name):
         if name not in self.tasks:
             raise ElementNotFound('There is no task with that name!')
@@ -71,17 +70,20 @@ class Habit:
             self.tasks[name].append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             print('Checked Task')
 
-    def getAllTasks(self):
+    # returns a list of all tasks currently set for the habit
+    def get_all_tasks(self):
         print(list(iter(self.tasks)))
         return
 
+    # analysis module core - computes all streaks achieved for the habit
     def calculate_streak(self):
-
         completions = []
+        # convert task timestamps to datetime objects and store in array
         for n in self.tasks.items():
             task_completions = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in n[1]]
             completions.append(task_completions)
 
+        # init variables used for analysis below
         step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
         active_streak = False
         streak_start = None
@@ -89,13 +91,13 @@ class Habit:
         streak_duration = 0
         analysis_data = []
 
+        # while loop to step through the time periods being analyzed
         while step <= datetime.now():
             # function to check if a timestamp is between the current step and step + period
             is_between = lambda dt: step <= dt <= step + timedelta(days=self.period)
 
             # generator expression to check if for the current period, every task has been completed at least once
             analyse_cache = sum(any(is_between(dt) for dt in x) for x in completions)
-
             # check if current period is a streak
             if analyse_cache == len(completions) and not active_streak:
                 streak_start = step
@@ -107,122 +109,21 @@ class Habit:
                 streak_end = step
                 active_streak = False
                 analysis_data.append([streak_start, streak_duration, streak_end])
-
-            # print("Between: "+str(step)+" and :" + str(step+timedelta(days=self.period))+" is between: " + str(result))
+                streak_duration = 0
             step += timedelta(days=self.period)
-
-        # print("Streak Analysis Data: " + str(analysis_data))
-
-        # task_dates = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S") for date in self.tasks.items()[1]]
-        # print(str(task_dates))
-
-        return analysis_data
-
-    def calculate_streak_new(self):
-        # Extract and convert task completions to datetime objects
-        completions = [[datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in task] for task in self.tasks.values()]
-
-        # Define a function to check if a timestamp is between the current step and step + period
-        def is_between(dt, step):
-            return step <= dt <= step + timedelta(days=self.period)
-
-        # Define a function to check if for the current period, every task has been completed at least once
-        def check_period_completions(step):
-            return all(any(is_between(dt, step) for dt in task) for task in completions)
-
-        # Initialize variables
-        step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
-        active_streak = False
-        streak_start = None
-        streak_end = None
-        streak_duration = 0
-        analysis_data = []
-
-        # Iterate over time steps using a generator expression
-        for step in (step + timedelta(days=self.period) * i for i in
-                     range((datetime.now() - step).days // self.period + 1)):
-            if check_period_completions(step):
-                if not active_streak:
-                    streak_start = step
-                    streak_duration += 1
-                    active_streak = True
-                else:
-                    streak_duration += 1
-            elif active_streak:
-                streak_end = step - timedelta(days=self.period)
-                active_streak = False
-                analysis_data.append([streak_start, streak_duration, streak_end])
+        # check if streak is still active after loop - if write to array (ongoing streak)
+        if active_streak:
+            streak_end = step
+            analysis_data.append([streak_start, streak_duration, streak_end])
 
         return analysis_data
 
-    def calculate_streak_revised(self):
 
-        completions = []
-        for n in self.tasks.items():
-            task_completions = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in n[1]]
-            completions.append(task_completions)
-
-        step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
-        active_streak = False
-        streak_start = None
-        streak_end = None
-        streak_duration = 0
-        analysis_data = []
-
-        while step <= datetime.now():
-            # function to check if a timestamp is between the current step and step + period
-            is_between = lambda dt: step <= dt <= step + timedelta(days=self.period)
-
-            # generator expression to check if for the current period, every task has been completed at least once
-            analyse_cache = sum(any(is_between(dt) for dt in x) for x in completions)
-
-            # check if current period is a streak
-            if analyse_cache == len(completions) and not active_streak:
-                streak_start = step
-                streak_duration += 1
-                active_streak = True
-            elif analyse_cache == len(completions) and active_streak:
-                streak_duration += 1
-            elif analyse_cache != len(completions) and active_streak:
-                streak_end = step
-                active_streak = False
-                analysis_data.append([streak_start, streak_duration, streak_end])
-
-            # print("Between: "+str(step)+" and :" + str(step+timedelta(days=self.period))+" is between: " + str(result))
-            step += timedelta(days=self.period)
-
-        # print("Streak Analysis Data: " + str(analysis_data))
-
-        # task_dates = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S") for date in self.tasks.items()[1]]
-        # print(str(task_dates))
-
-        return analysis_data
-
-def x():
-    top_streak = {"days": 0}
-
-    habit = "workout"
-    data = habits[habit].calculate_streak_revised()
-    for streaks in data:
-        streak_days = streaks[1] * habits[habit].period
-        if streak_days > top_streak["days"]:
-            top_streak["days"] = streak_days
-            top_streak["habit"] = habits[habit].name
-            top_streak["period"] = habits[habit].period
-            top_streak["start"] = streaks[0]
-            top_streak["end"] = streaks[2]
-
-    print("The Longest Streak was your " + top_streak["habit"] + " Habit")
-    print(
-        "It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
-    print("Beginning on " + datetime.strftime(top_streak["start"],
-                                              "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
-        top_streak["end"], "%Y-%m-%d %H:%M:%S"))
-
-
+# init habits array - stores all habits loaded into memory
 habits = {}
 
 
+# adds a habit
 def add_habit(name, period):
     try:
         if name in habits:
@@ -234,51 +135,57 @@ def add_habit(name, period):
         print(err, str(e))
 
 
+# removes a habit
 def remove_habit(name):
     try:
         if name in habits:
             del habits[name]
-            print('Deleted ' + name)
+            print('Deleted Habit ' + name)
         else:
-            print('There is no habit with that name!')
+            print(err + 'There is no habit with that name!')
     except Exception as e:
         print(err, str(e))
 
 
-def addTask(habit, task):
+# wrapper function to add a task to a habit
+def add_task(habit, task):
     try:
         if not habit in habits:
-            print("Error: There is no Habit with that Name!")
+            print(err + "There is no Habit with that Name!")
         else:
             habits[habit].add_task(task)
     except Exception as e:
         print(err, str(e))
 
 
-def removeTask(habit, task):
+# wrapper function to remove a task from a habit
+def remove_task(habit, task):
     try:
         if not habit in habits:
-            print("There is no Habit with that Name!")
+            print(err + "There is no Habit with that Name!")
         else:
             habits[habit].remove_task(task)
     except Exception as e:
         print(err, str(e))
 
 
-def checkTask(habit, task):
+# wrapper function to check off a task in a habit
+def check_task(habit, task):
     try:
         if not habit in habits:
-            print("There is no Habit with that Name!")
+            print(err + "There is no Habit with that Name!")
         else:
             habits[habit].check_task(task)
     except Exception as e:
         print(err, str(e))
 
 
+# prints list of all habits stored in habits dict
 def get_all_habits():
     print(list(habits.keys()))
 
 
+# prints all periods and their associated habits
 def get_habits_by_period():
     # loop through all stored habits and extract periods
     unique_periods = set(habit.period for habit in habits.values())
@@ -289,12 +196,13 @@ def get_habits_by_period():
         print("Habits with Period " + str(period) + ": " + str(filtered_habits))
 
 
+# prints all tasks for a habit
 def get_all_tasks(habit):
     try:
         if not habit in habits:
-            print("There is no Habit with that Name!")
+            print(err + "There is no Habit with that Name!")
         else:
-            habits[habit].getAllTasks()
+            habits[habit].get_all_tasks()
     except Exception as e:
         print(err, str(e))
 
@@ -316,26 +224,31 @@ def time_unit_conversion(days):
         return "0 days"
 
 
+# prints analysis data for a habit
 def get_analysis(habit):
     try:
         if not habit in habits:
-            print("There is no Habit with that Name!")
+            print(err + "There is no Habit with that Name!")
         else:
             streaks = habits[habit].calculate_streak()
             print("Here is the analysis for your " + habit + " Habit")
             print("-------------------------------------")
-            print("This habit has " + str(len(streaks)) + " Streaks")
+            print("This Habit has " + str(len(streaks)) + " Streaks")
             print("-------------------------------------")
             for n in range(0, len(streaks)):
                 print("--- Streak Number: " + str(n + 1) + " ---")
                 print("Streak Start: " + str(streaks[n][0]))
                 print("Streak Duration: " + time_unit_conversion(streaks[n][1] * habits[habit].period) + " (" + str(
                     streaks[n][1]) + " Periods)")
+                # print Ongoing instead of date in the future
+                if streaks[n][2] > datetime.now():
+                    streaks[n][2] = "Ongoing"
                 print("Streak End: " + str(streaks[n][2]))
     except Exception as e:
         print(err, str(e))
 
 
+# prints analysis data to find the longest streak between all habits
 def get_max_streak_all():
     top_streak = {"days": 0}
     for habit in habits:
@@ -351,10 +264,14 @@ def get_max_streak_all():
                 top_streak["end"] = streaks[2]
 
     print("The Longest Streak was your " + top_streak["habit"] + " Habit")
-    print("It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
-    print("Beginning on " + datetime.strftime(top_streak["start"], "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(top_streak["end"], "%Y-%m-%d %H:%M:%S"))
+    print(
+        "It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
+    print("Beginning on " + datetime.strftime(top_streak["start"],
+                                              "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
+        top_streak["end"], "%Y-%m-%d %H:%M:%S"))
 
 
+# prints max streak for a single habit
 def get_max_streak_single(habit):
     top_streak = {"days": 0}
     data = habits[habit].calculate_streak()
@@ -366,10 +283,14 @@ def get_max_streak_single(habit):
             top_streak["start"] = streaks[0]
             top_streak["end"] = streaks[2]
 
-    print("The Longest Streak in your " + habit + " Habit lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
-    print("Beginning on " + datetime.strftime(top_streak["start"], "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(top_streak["end"], "%Y-%m-%d %H:%M:%S"))
+    print("The Longest Streak in your " + habit + " Habit lasted for " + time_unit_conversion(
+        top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
+    print("Beginning on " + datetime.strftime(top_streak["start"],
+                                              "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
+        top_streak["end"], "%Y-%m-%d %H:%M:%S"))
 
 
+# converts data in habits dict to json and saves to file
 def save_to_file():
     data = []
     try:
@@ -389,47 +310,33 @@ def save_to_file():
         print(err, str(e))
 
 
+# looks for save file - uses json information to create all habit objects and store them in habits array
+# creates new save file of none is found
 def load_from_file():
-    # overwirte error handleing
+    # overwirte error handling
     if os.path.exists('hbtracker_save.json'):
         print('Loading Save Data from file...')
+        with open('hbtracker_save.json', 'r') as f:
+            data = json.load(f)
+        f.close()
+        for entry in data:
+            habit = Habit(entry['name'], entry['period'])
+            habit.creation_date = entry['creation_date']
+            habit.tasks = entry['tasks']
+            habits[habit.name] = habit
     else:
-        print(war + 'No Save File found! Creating new... ')
-
-    with open('hbtracker_save.json', 'r') as f:
-        data = json.load(f)
-    f.close()
-    for entry in data:
-        habit = Habit(entry['name'], entry['period'])
-        habit.creation_date = entry['creation_date']
-        habit.tasks = entry['tasks']
-        habits[habit.name] = habit
+        print(war + 'No Save File found!')
 
 
+# clears habit array and reloads data from save file
+# initially used for debugging, left in because it might be useful for testing
 def reload():
     habits.clear()
     load_from_file()
 
 
-def writer():
-    add_habit('workout', 7)
-    habits['workout'].add_task('sit ups')
-    habits['workout'].add_task('stand ups')
-    habits['workout'].add_task('pull ups')
-    add_habit('drink water', 1)
-    habits['drink water'].add_task('drink 2L')
-    add_habit('learn new skill', 30)
-    habits['learn new skill'].add_task('read book')
-    habits['learn new skill'].add_task('practice')
-    habits['learn new skill'].add_task('show people')
-    habits['learn new skill'].add_task('write report')
-    habits['workout'].check_task('sit ups')
-    habits['workout'].check_task('stand ups')
-    habits['workout'].check_task('pull ups')
-    habits['workout'].check_task('pull ups')
-
-
-def clearScreen():
+# wrapper function to clear the screen - quality of life feature
+def clear_screen():
     os.system('cls')
 
 
@@ -438,7 +345,9 @@ def join_arguments(args):
     return ' '.join(args)
 
 
+# main method that handles user input and command mapping
 def main():
+    # parsers used to handle commands with parameters
     parser = argparse.ArgumentParser(prog='Habit Tracker', description='Habit Tracker 1.0')
     subparsers = parser.add_subparsers(title='Commands', dest='command')
 
@@ -470,14 +379,15 @@ def main():
     parser_checktask = subparsers.add_parser('getMaxStreak', help='Returns all Tasks for a habit')
     parser_checktask.add_argument('habit')
 
+    # subparsers used to handle commands that do not require parameters
     subparsers.add_parser('reload', help='reload save file')
     subparsers.add_parser('getLongest', help='reload save file')
     subparsers.add_parser('getAllHabits', help='Returns all stored Habits')
     subparsers.add_parser('getHabitsByPeriod', help='Returns Lists of Habits sorted by period')
     subparsers.add_parser('save', help='Saves data to file')
     subparsers.add_parser('clear', help='Clear the screen')
-    subparsers.add_parser('x', help='Clear the screen')
 
+    # dict stores mappings for commands to corresponding functions
     commandFunctionMapping = {
         'reload': reload,
         'getAllHabits': get_all_habits,
@@ -486,16 +396,16 @@ def main():
         'addHabit': add_habit,
         'removeHabit': remove_habit,
         'save': save_to_file,
-        'clear': clearScreen,
-        'addTask': addTask,
-        'removeTask': removeTask,
-        'checkTask': checkTask,
+        'clear': clear_screen,
+        'addTask': add_task,
+        'removeTask': remove_task,
+        'checkTask': check_task,
         'analyze': get_analysis,
         'getLongest': get_max_streak_all,
         'getMaxStreak': get_max_streak_single,
-        'x': x,
     }
 
+    # main loop that waits for user input
     while True:
         userInput = input("HabitTracker> ")
         if userInput == 'exit':
@@ -517,6 +427,7 @@ def main():
                 pass
 
 
+# program startup function - loads save file and hands off to main loop
 if __name__ == '__main__':
     print("### HabitTracker 1.0 ###")
     load_from_file()
