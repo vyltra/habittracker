@@ -265,7 +265,7 @@ def get_max_streak_all():
 
     print("The Longest Streak was your " + top_streak["habit"] + " Habit")
     print(
-        "It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
+        "It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(round(top_streak["days"] / top_streak["period"], 2)) + " Period(s))")
     print("Beginning on " + datetime.strftime(top_streak["start"],
                                               "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
         top_streak["end"], "%Y-%m-%d %H:%M:%S"))
@@ -366,22 +366,22 @@ def main():
     parser_removetask.add_argument('habit')
     parser_removetask.add_argument('task')
 
-    parser_checktask = subparsers.add_parser('checkTask', help='Checks off a Task')
+    parser_checktask = subparsers.add_parser('checkTask', help='Checks off a Task in a Habit')
     parser_checktask.add_argument('habit')
     parser_checktask.add_argument('task')
 
-    parser_checktask = subparsers.add_parser('getAllTasks', help='Returns all Tasks for a habit')
+    parser_checktask = subparsers.add_parser('getAllTasks', help='Returns all Tasks for a Habit')
     parser_checktask.add_argument('habit')
 
-    parser_checktask = subparsers.add_parser('analyze', help='Returns all Tasks for a habit')
+    parser_checktask = subparsers.add_parser('analyze', help='Calculates all streaks for a Habit')
     parser_checktask.add_argument('habit')
 
-    parser_checktask = subparsers.add_parser('getMaxStreak', help='Returns all Tasks for a habit')
+    parser_checktask = subparsers.add_parser('getMaxStreak', help='Calculates the maximum streak for a Habit')
     parser_checktask.add_argument('habit')
 
     # subparsers used to handle commands that do not require parameters
     subparsers.add_parser('reload', help='reload save file')
-    subparsers.add_parser('getLongest', help='reload save file')
+    subparsers.add_parser('getMaxStreakAll', help='Calculates the maximum streak between all Habits')
     subparsers.add_parser('getAllHabits', help='Returns all stored Habits')
     subparsers.add_parser('getHabitsByPeriod', help='Returns Lists of Habits sorted by period')
     subparsers.add_parser('save', help='Saves data to file')
@@ -401,7 +401,7 @@ def main():
         'removeTask': remove_task,
         'checkTask': check_task,
         'analyze': get_analysis,
-        'getLongest': get_max_streak_all,
+        'getMaxStreakAll': get_max_streak_all,
         'getMaxStreak': get_max_streak_single,
     }
 
