@@ -284,7 +284,7 @@ def get_max_streak_single(habit):
             top_streak["end"] = streaks[2]
 
     print("The Longest Streak in your " + habit + " Habit lasted for " + time_unit_conversion(
-        top_streak["days"]) + " (" + str(top_streak["period"]) + " Period(s))")
+        top_streak["days"]) + " (" + str(round(top_streak["days"] / top_streak["period"], 2)) + " Period(s))")
     print("Beginning on " + datetime.strftime(top_streak["start"],
                                               "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
         top_streak["end"], "%Y-%m-%d %H:%M:%S"))
@@ -405,26 +405,27 @@ def main():
         'getMaxStreak': get_max_streak_single,
     }
 
-    # main loop that waits for user input
+    # main loop that handles user input
     while True:
         userInput = input("HabitTracker> ")
         if userInput == 'exit':
             break
         elif userInput == "":
             pass
+        elif userInput == "help" or userInput == "-h":
+            parser.print_help()
         else:
-            try:
-                args = parser.parse_args(userInput.split())
-                if args.command in commandFunctionMapping:
+            if userInput.split()[0] in commandFunctionMapping:
+                try:
+                    args = parser.parse_args(userInput.split())
                     function = commandFunctionMapping[args.command]
                     function_args = vars(args)
                     function_args.pop("command")
                     function(**function_args)
-                else:
-                    print("Invalid Command")
-
-            except SystemExit:
-                pass
+                except SystemExit:
+                    pass
+            else:
+                print("Invalid Command")
 
 
 # program startup function - loads save file and hands off to main loop
