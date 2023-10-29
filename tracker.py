@@ -6,8 +6,8 @@ import TrackerExceptions as Exceptions
 from TrackerHabit import Habit
 
 # global Error / Warning sign
-err = "[Error]"
-war = "[Warning] "
+err = '[Error]'
+war = '[Warning] '
 
 # init habits array - stores all habits loaded into memory
 habits = {}
@@ -83,7 +83,7 @@ def get_habits_by_period():
     # loop through set of unique periods to extract habit names
     for period in sorted(unique_periods):
         filtered_habits = [habit.name for habit in habits.values() if habit.period == period]
-        print("Habits with Period " + str(period) + ": " + str(filtered_habits))
+        print('Habits with Period ' + str(period) + ': ' + str(filtered_habits))
 
 
 # prints all tasks for a habit
@@ -121,64 +121,64 @@ def get_analysis(habit):
             raise Exceptions.ElementNotFound('There is no habit with that name!')
         else:
             streaks = habits[habit].calculate_streak()
-            print("Here is the analysis for your " + habit + " Habit")
-            print("-------------------------------------")
-            print("This Habit has " + str(len(streaks)) + " Streaks")
-            print("-------------------------------------")
+            print('Here is the analysis for your ' + habit + ' Habit')
+            print('-------------------------------------')
+            print('This Habit has ' + str(len(streaks)) + ' Streaks')
+            print('-------------------------------------')
             for n in range(0, len(streaks)):
-                print("--- Streak Number: " + str(n + 1) + " ---")
-                print("Streak Start: " + str(streaks[n][0]))
-                print("Streak Duration: " + time_unit_conversion(streaks[n][1] * habits[habit].period) + " (" + str(
-                    streaks[n][1]) + " Periods)")
+                print('--- Streak Number: ' + str(n + 1) + ' ---')
+                print('Streak Start: ' + str(streaks[n][0]))
+                print('Streak Duration: ' + time_unit_conversion(streaks[n][1] * habits[habit].period) + ' (' + str(
+                    streaks[n][1]) + ' Periods)')
                 # print Ongoing instead of date in the future
                 if streaks[n][2] > datetime.now():
-                    streaks[n][2] = "Ongoing"
-                print("Streak End: " + str(streaks[n][2]))
+                    streaks[n][2] = 'Ongoing'
+                print('Streak End: ' + str(streaks[n][2]))
     except Exception as e:
         print(err, str(e))
 
 
 # prints analysis data to find the longest streak between all habits
 def get_max_streak_all():
-    top_streak = {"days": 0}
+    top_streak = {'days': 0}
     for habit in habits:
         # streaks[habits[habit].name] = habits[habit].calculate_streak()
         data = habits[habit].calculate_streak()
         for streaks in data:
             streak_days = streaks[1] * habits[habit].period
-            if streak_days > top_streak["days"]:
-                top_streak["days"] = streak_days
-                top_streak["habit"] = habits[habit].name
-                top_streak["period"] = habits[habit].period
-                top_streak["start"] = streaks[0]
-                top_streak["end"] = streaks[2]
+            if streak_days > top_streak['days']:
+                top_streak['days'] = streak_days
+                top_streak['habit'] = habits[habit].name
+                top_streak['period'] = habits[habit].period
+                top_streak['start'] = streaks[0]
+                top_streak['end'] = streaks[2]
 
-    print("The Longest Streak was your " + top_streak["habit"] + " Habit")
+    print('The Longest Streak was your ' + top_streak['habit'] + ' Habit')
     print(
-        "It lasted for " + time_unit_conversion(top_streak["days"]) + " (" + str(
-            round(top_streak["days"] / top_streak["period"], 2)) + " Period(s))")
-    print("Beginning on " + datetime.strftime(top_streak["start"],
-                                              "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
-        top_streak["end"], "%Y-%m-%d %H:%M:%S"))
+        'It lasted for ' + time_unit_conversion(top_streak['days']) + ' (' + str(
+            round(top_streak['days'] / top_streak['period'], 2)) + ' Period(s))')
+    print('Beginning on ' + datetime.strftime(top_streak['start'],
+                                              '%Y-%m-%d %H:%M:%S') + ' and Ending on ' + datetime.strftime(
+        top_streak['end'], '%Y-%m-%d %H:%M:%S'))
 
 
 # prints max streak for a single habit
 def get_max_streak_single(habit):
-    top_streak = {"days": 0}
+    top_streak = {'days': 0}
     data = habits[habit].calculate_streak()
     for streaks in data:
         streak_days = streaks[1] * habits[habit].period
-        if streak_days > top_streak["days"]:
-            top_streak["days"] = streak_days
-            top_streak["period"] = habits[habit].period
-            top_streak["start"] = streaks[0]
-            top_streak["end"] = streaks[2]
+        if streak_days > top_streak['days']:
+            top_streak['days'] = streak_days
+            top_streak['period'] = habits[habit].period
+            top_streak['start'] = streaks[0]
+            top_streak['end'] = streaks[2]
 
-    print("The Longest Streak in your " + habit + " Habit lasted for " + time_unit_conversion(
-        top_streak["days"]) + " (" + str(round(top_streak["days"] / top_streak["period"], 2)) + " Period(s))")
-    print("Beginning on " + datetime.strftime(top_streak["start"],
-                                              "%Y-%m-%d %H:%M:%S") + " and Ending on " + datetime.strftime(
-        top_streak["end"], "%Y-%m-%d %H:%M:%S"))
+    print('The Longest Streak in your ' + habit + ' Habit lasted for ' + time_unit_conversion(
+        top_streak['days']) + ' (' + str(round(top_streak['days'] / top_streak['period'], 2)) + ' Period(s))')
+    print('Beginning on ' + datetime.strftime(top_streak['start'],
+                                              '%Y-%m-%d %H:%M:%S') + ' and Ending on ' + datetime.strftime(
+        top_streak['end'], '%Y-%m-%d %H:%M:%S'))
 
 
 # converts data in habits dict to json and saves to file
@@ -243,15 +243,15 @@ def main():
     subparsers = parser.add_subparsers(title='Commands', dest='command')
 
     parser_addhabit = subparsers.add_parser('addHabit', help='Adds a Habit')
-    parser_addhabit.add_argument("name")
-    parser_addhabit.add_argument("period")
+    parser_addhabit.add_argument('name')
+    parser_addhabit.add_argument('period')
 
     parser_removehabit = subparsers.add_parser('removeHabit', help='Removes a Habit and all its data')
-    parser_removehabit.add_argument("name")
+    parser_removehabit.add_argument('name')
 
     parser_addtask = subparsers.add_parser('addTask', help='Adds a Task to a Habit')
-    parser_addtask.add_argument("habit")
-    parser_addtask.add_argument("task")
+    parser_addtask.add_argument('habit')
+    parser_addtask.add_argument('task')
 
     parser_removetask = subparsers.add_parser('removeTask', help='Removes a Task from a Habit')
     parser_removetask.add_argument('habit')
@@ -298,12 +298,12 @@ def main():
 
     # main loop that handles user input
     while True:
-        userInput = input("HabitTracker> ")
+        userInput = input('HabitTracker> ')
         if userInput == 'exit':
             break
-        elif userInput == "":
+        elif userInput == '':
             pass
-        elif userInput == "help" or userInput == "-h":
+        elif userInput == 'help' or userInput == '-h':
             parser.print_help()
         else:
             if userInput.split()[0] in commandFunctionMapping:
@@ -311,16 +311,16 @@ def main():
                     args = parser.parse_args(userInput.split())
                     function = commandFunctionMapping[args.command]
                     function_args = vars(args)
-                    function_args.pop("command")
+                    function_args.pop('command')
                     function(**function_args)
                 except SystemExit:
                     pass
             else:
-                print("Invalid Command")
+                print('Invalid Command')
 
 
 # program startup function - loads save file and hands off to main loop
 if __name__ == '__main__':
-    print("### HabitTracker 1.0 ###")
+    print('### HabitTracker 1.0 ###')
     load_from_file()
     main()

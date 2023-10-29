@@ -19,7 +19,7 @@ class Habit:
 
         self.period = period
         self.name = name
-        self.creation_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.creation_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.tasks = {}
 
     # adds a task to the habit
@@ -43,7 +43,7 @@ class Habit:
         if name not in self.tasks:
             raise Exceptions.ElementNotFound('There is no task with that name!')
         else:
-            self.tasks[name].append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            self.tasks[name].append(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             print('Checked Task')
 
     # returns a list of all tasks currently set for the habit
@@ -56,11 +56,11 @@ class Habit:
         completions = []
         # convert task timestamps to datetime objects and store in array
         for n in self.tasks.items():
-            task_completions = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in n[1]]
+            task_completions = [datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in n[1]]
             completions.append(task_completions)
 
         # init variables used for analysis below
-        step = datetime.strptime(self.creation_date, "%Y-%m-%d %H:%M:%S")
+        step = datetime.strptime(self.creation_date, '%Y-%m-%d %H:%M:%S')
         active_streak = False
         streak_start = None
         streak_end = None
