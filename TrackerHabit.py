@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import TrackerExceptions as Exceptions
 
+
 # main habit class to define habit structure
 class Habit:
     def __init__(self, name, period):
@@ -63,7 +64,6 @@ class Habit:
         step = datetime.strptime(self.creation_date, '%Y-%m-%d %H:%M:%S')
         active_streak = False
         streak_start = None
-        streak_end = None
         streak_duration = 0
         analysis_data = []
 
@@ -93,4 +93,3 @@ class Habit:
             analysis_data.append([streak_start, streak_duration, streak_end])
 
         return analysis_data
-

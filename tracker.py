@@ -40,7 +40,7 @@ def remove_habit(name):
 # wrapper function to add a task to a habit
 def add_task(habit, task):
     try:
-        if not habit in habits:
+        if habit not in habits:
             raise Exceptions.ElementNotFound('There is no habit with that name!')
         else:
             habits[habit].add_task(task)
@@ -51,7 +51,7 @@ def add_task(habit, task):
 # wrapper function to remove a task from a habit
 def remove_task(habit, task):
     try:
-        if not habit in habits:
+        if habit not in habits:
             raise Exceptions.ElementNotFound('There is no habit with that name!')
         else:
             habits[habit].remove_task(task)
@@ -62,7 +62,7 @@ def remove_task(habit, task):
 # wrapper function to check off a task in a habit
 def check_task(habit, task):
     try:
-        if not habit in habits:
+        if habit not in habits:
             raise Exceptions.ElementNotFound('There is no habit with that name!')
         else:
             habits[habit].check_task(task)
@@ -89,7 +89,7 @@ def get_habits_by_period():
 # prints all tasks for a habit
 def get_all_tasks(habit):
     try:
-        if not habit in habits:
+        if habit not in habits:
             raise Exceptions.ElementNotFound('There is no habit with that name!')
         else:
             habits[habit].get_all_tasks()
@@ -117,7 +117,7 @@ def time_unit_conversion(days):
 # prints analysis data for a habit
 def get_analysis(habit):
     try:
-        if not habit in habits:
+        if habit not in habits:
             raise Exceptions.ElementNotFound('There is no habit with that name!')
         else:
             streaks = habits[habit].calculate_streak()
