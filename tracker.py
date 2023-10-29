@@ -303,7 +303,7 @@ def main():
             break
         elif userInput == '':
             pass
-        elif userInput == 'help' or userInput == '-h':
+        elif userInput == 'help' or userInput == '-h' or userInput == '--help':
             parser.print_help()
         else:
             if userInput.split()[0] in commandFunctionMapping:
