@@ -59,3 +59,7 @@ If not, run `pip install pytest` in your local terminal.
 
 You can run the tests by typing `pytest test_tracker.py` in your terminal
 This project has been developed using Pytest 7.2.2 and Python 3.9.5
+
+## A Note on Testing
+If you would like to do some manual testing, you can modify the timestamps in the hbtracker.json file by hand using a text editor. The timestamps are stored as 
+strings and converted into datetime objects during runtime. Just make sure to adhere to the Y-m-d H:M:S structure.
